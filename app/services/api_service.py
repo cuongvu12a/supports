@@ -1,0 +1,81 @@
+import requests
+from typing import List, Dict, Any
+
+from app.core import singleton
+
+BASE_URL = "https://fulfillment.merchize.com"
+X_API_KEY = "19e44715-7743-5e02-a66e-9ce064ee5cd1"
+API_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTM2NTM4NGU2ODY2NmNmZWFlZDVhOSIsInVzZXJuYW1lIjoiY3Vvbmd2bisxQGZvb2JsYS5jb20iLCJyb2xlcyI6W3siX2lkIjoiNjU4ZTZhNmViY2U3YTZhNGFmMjFlODlkIiwibmFtZSI6ImZhY19hZG1pbiJ9LHsiX2lkIjoiNjU4ZTZjOGJiY2U3YTZhNGFmMmZlZGE0IiwibmFtZSI6ImZmbV9hZG1pbiJ9LHsiX2lkIjoiNjY4ZjVhMzdiN2E3Y2UzMGE3ZWExYTU5IiwibmFtZSI6ImZhY191c19hZG1pbiJ9XSwiaXNfYWRtaW4iOmZhbHNlLCJkZXBhcnRtZW50Ijp7Il9pZCI6IjY1OGU4ZTMwZTA1ZjVlNWU5NmNmZmM0OCIsImtleSI6IkZGTSIsIm5hbWUiOiJGdWxmaWxsbWVudCIsImNyZWF0ZWRfYXQiOiIyMDIzLTEyLTI5VDA5OjE1OjI4Ljg1OVoiLCJ1cGRhdGVkX2F0IjoiMjAyMy0xMi0yOVQwOToxNToyOC44NTlaIiwiX192IjowfSwicGVybWlzc2lvbnMiOnsiYmF0Y2hfcnVsZV9tYW5hZ2VtZW50IjoiTWFuYWdlIGF1dG8gY3JlYXRlIGJhdGNoIHJ1bGVzIiwiZ2V0X2JyYW5kX3RhZyI6IkdldCBicmFuZCB0YWciLCJ1cGRhdGVfYnJhbmQiOiJ1cGRhdGUgYnJhbmQiLCJjcmVhdGVfYnJhbmQiOiJDcmVhdGUgYnJhbmQiLCJiYXNlX2Nvc3RfbWFuYWdlbWVudCI6IkZBQyBiYXNlIGNvc3QgbWFuYWdlbWVudCIsInVzZXJfYWN0aW9uX21hbmFnZW1lbnQiOiJVc2VyIGFjdGlvbiBtYW5hZ2VtZW50Iiwicm9sZV9tYW5hZ2VtZW50IjoiUm9sZSBtYW5hZ2VtZW50IiwicGVybWlzc2lvbl9tYW5hZ2VtZW50IjoiUGVybWlzc2lvbiBtYW5hZ2VtZW50IiwidXNlcl9tYW5hZ2VtZW50IjoiVXNlciBtYW5hZ2VtZW50IiwicmVxdWVzdF91cGRhdGUiOiJSZXF1ZXN0IHVwZGF0ZSIsImZhY191c2VyX21hbmFnZW1lbnQiOiJGQUMgdXNlciBtYW5hZ2VtZW50IiwiZmFjX3JvbGVfbWFuYWdlbWVudCI6IkZBQyByb2xlIG1hbmFnZW1lbnQiLCJmYWNfcGVybWlzc2lvbl9tYW5hZ2VtZW50IjoiRkFDIHBlcm1pc3Npb24gbWFuYWdlbWVudCIsImZhY19jb25maXJtX2ZmbV9pc3N1ZSI6IkZBQyBjb25maXJtIGZmbSBpc3N1ZSIsImZmbV9pc3N1ZV9saXN0IjoiRkZNIGxpc3QgaXNzdWVzIiwiZmZtX3ZpZXdfaXNzdWVfcmVwb3J0IjoiRkZNIHZpZXcgaXNzdWUgcmVwb3J0IiwiZmFjX3VzX3VzZXJfbWFuYWdlbWVudCI6IlVzZXIgbWFuYWdlbWVudCJ9LCJpYXQiOjE3NDcxMzMyODUsImV4cCI6MTc0OTcyNTI4NX0.UJ2D31QWNYVvlGwcMIpyPVb-2J2cEUJpb5J0awo-UPU"
+
+
+@singleton
+class APIService:
+    def __init__(self):
+        print("[APIService] __init__")
+        self.headers = {
+            "Content-Type": "application/json",
+            # "x-api-key": X_API_KEY,
+            "Authorization": f"Bearer {API_TOKEN}",
+        }
+        self.session = requests.Session()
+        self.session.headers.update(self.headers)
+
+    def list_jobs(self, payload: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if not payload:
+            raise ValueError("Payload must not be empty")
+
+        url = f"{BASE_URL}/api/order/printing-files/search"
+        response = self.session.post(url, json=payload)
+        response.raise_for_status()
+        json_response = response.json()
+        return json_response.get("data", {}).get("items", [])
+
+    def convert_dtx(self, item, retry_job: bool = False):
+        product_type = item.get("variant_data", {}).get("product_type", "")
+        if not product_type.endswith("_PET"):
+            print(
+                f"❌ Item {item.get('name')}_{item.get('item_number')}: not a PET product, skipping conversion"
+            )
+            return
+
+        tags = item.get("tags", [])
+        if "DTG_2_DTF" in tags:
+            print(
+                f"✅ Item {item.get('name')}_{item.get('item_number')}: already converted to DTX, skipping"
+            )
+            return
+
+        item_id = item.get("_id")
+        name = item.get("name")
+        item_number = item.get("item_number")
+        artworks = item.get("artworks", [])
+
+        url = f"{BASE_URL}/api/order/printing-files/items/{item_id}/convert-item-to-dtx"
+        payload = {
+            "artworks": artworks,
+        }
+        response = self.session.put(url, json=payload)
+        response.raise_for_status()
+        json_response = response.json()
+        success = json_response.get("success")
+        if success:
+            print(f"✅ Item {name}_{item_number}: successfully converted to DTX")
+            if retry_job:
+                self.retry_job(item)
+        else:
+            print(f"❌ Item {name}_{item_number}: conversion to DTX failed")
+
+    def retry_job(self, item):
+        name = item.get("name")
+        item_number = item.get("item_number")
+        item_id = item.get("_id")
+        fulfillment_id = item.get("fulfillment")
+        url = f"{BASE_URL}/api/order/printing-files/{fulfillment_id}/items/{item_id}/status/retry"
+        response = self.session.put(url)
+        response.raise_for_status()
+        json_response = response.json()
+        success = json_response.get("success")
+        if success:
+            print(f"✅ Item {name}_{item_number}: retry job")
+        else:
+            print(f"❌ Item {name}_{item_number}: retry job failed")
