@@ -30,7 +30,7 @@ class APIService:
         json_response = response.json()
         return json_response.get("data", {}).get("items", [])
 
-    def convert_dtx(self, item, retry_job: bool = False):
+    def convert_dtx(self, item, retry_job: bool):
         product_type = item.get("variant_data", {}).get("product_type", "")
         if not product_type.endswith("_PET"):
             print(
@@ -64,6 +64,48 @@ class APIService:
                 self.retry_job(item)
         else:
             print(f"❌ Item {name}_{item_number}: conversion to DTX failed")
+            
+    def change_type(self, item, retry_job: bool, add_prefix: str = None, remove_prefix: str = None):
+        item_id = item.get("_id")
+        name = item.get("name")
+        item_number = item.get("item_number")
+        product_type = item.get("variant_data", {}).get("product_type", "")
+        front = item.get("design_front", None)
+        back = item.get("design_back", None)
+        sleeves = item.get("design_sleeves", None)
+        hood = item.get("design_hood", None)
+        
+        if add_prefix:
+            if not product_type.startswith(add_prefix):
+                updated_product_type = f"{add_prefix}{product_type}"
+        
+        if remove_prefix:
+            if product_type.startswith(remove_prefix):
+                updated_product_type = product_type[len(remove_prefix):]
+
+        if not updated_product_type:
+            print(f"❌ Item {name}_{item_number}: no change in product type, skipping")
+            return
+        
+        url = f"{BASE_URL}/api/order/fulfillment-items/printing-files/{item_id}/designs"
+        payload = {
+            "front": front,
+            "back": back,
+            "sleeves": sleeves,
+            "hood": hood,
+            "type": updated_product_type,
+        }
+        
+        response = self.session.post(url, json=payload)
+        response.raise_for_status()
+        json_response = response.json()
+        success = json_response.get("success")
+        if success:
+            print(f"✅ Item {name}_{item_number}: successfully changed type to {updated_product_type}")
+            if retry_job:
+                self.retry_job(item)
+        else:
+            print(f"❌ Item {name}_{item_number}: changing type to {updated_product_type} failed")
 
     def retry_job(self, item):
         name = item.get("name")
