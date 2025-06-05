@@ -1,0 +1,53 @@
+{
+    "post": "https://fulfillment-staging.merchize.com/api/order/fulfillment/6841362c1b1d6cf55df8ae76/create-replace-package",
+    "payload": {
+        "name": "2 Item (đừng Động Của Iem)",
+        "address1": "3021 Saddlehorn Dr",
+        "address2": "",
+        "city": "Seguin",
+        "state": "TX",
+        "phone": "",
+        "country": "US",
+        "postalCode": "78155",
+        "email": "LINH_6126816@foobla.com",
+        "countryCode": "US",
+        "supplier": "64cc7d3a1badf48abe34c0fc",
+        "create_invoice": false,
+        "reuse_label": false,
+        "items": [
+            {
+                "_id": "6841362d1b1d6c1eb6f8ae78",
+                "design_front": "https://merchize-artworks.s3.us-west-1.amazonaws.com/i61f3hf/artworks/672ced9026e7ca3e7be3bc7c/25/06/1748931712398-5634c5ac-a925-4040-a3f6-4cd0162a3fa3.png?AWSAccessKeyId=AKIAWYYRKM2QFT2QVQH3&Expires=1756880172&Signature=BXhxjiyey07H1StFQ%2BI5y652bF4%3D",
+                "design_back": "",
+                "design_hood": "",
+                "design_sleeves": "",
+                "mockup_front": "https://d5xh8as6wnpix.cloudfront.net/thumb/product/w_1000/ss42nizi/products/672ced9026e7ca3e7be3bc7c/front/thumb.jpg",
+                "mockup_back": "",
+                "type": "HOODIE_PY",
+                "quantity": 2,
+                "variant": {
+                    "_id": "65f2801ae049c0562b5da72a",
+                    "as_quantity": 1
+                }
+            },
+            {
+                "_id": "6841362d1b1d6c7664f8ae7a",
+                "design_front": "",
+                "design_back": "",
+                "design_hood": "",
+                "design_sleeves": "https://merchize-artworks.s3.us-west-1.amazonaws.com/i61f3hf/artworks/6731b3b567c93b67fcfe6493/25/06/1748933242292-45c33ca3-6168-401e-996c-3342bed2044c.png?AWSAccessKeyId=AKIAWYYRKM2QFT2QVQH3&Expires=1756880172&Signature=15UALIPg1cQ6MnTJzkj6yCwaz60%3D",
+                "mockup_front": "https://d5xh8as6wnpix.cloudfront.net/thumb/product/w_1000/ss42nizi/products/6731b3b567c93b67fcfe6493/t-shirt/0/thumb.jpg",
+                "mockup_back": "",
+                "type": "YOUTH_HOODIE185_PY",
+                "quantity": 2,
+                "variant": {
+                    "_id": "65f27e1ae049c063545da71d",
+                    "as_quantity": 1
+                }
+            }
+        ],
+        "markFastProduction": false,
+        "context": "RemapFromOrderDetailPage",
+        "shipping_carrier": "standard"
+    }
+}
