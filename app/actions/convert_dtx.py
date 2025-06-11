@@ -19,6 +19,8 @@ def convert_job(payload):
 
     confirm_handling(jobs)
     for job in jobs:
+        # api_service.retry_job(job)
         # api_service.convert_dtx(job, retry_job=True)
         # api_service.change_type(job, retry_job=True, add_prefix="DZT_")
-        api_service.change_type(job, retry_job=False, remove_prefix="DZT_")
+        # api_service.change_type(job, retry_job=False, remove_prefix="DZT_")
+        api_service.change_type(job, retry_job=True, updated_product_type='BIOWASH_HAT_VC300A_PET')

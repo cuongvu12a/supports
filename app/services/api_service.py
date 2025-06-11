@@ -65,7 +65,7 @@ class APIService:
             print(f"❌ Item {name}_{item_number}: conversion to DTX failed")
 
     def change_type(
-        self, item, retry_job: bool, add_prefix: str = None, remove_prefix: str = None
+        self, item, retry_job: bool, add_prefix: str = None, remove_prefix: str = None, updated_product_type: str = None
     ):
         item_id = item.get("_id")
         name = item.get("name")
@@ -235,6 +235,6 @@ class APIService:
         json_response = response.json()
         success = json_response.get("success")
         if not success:
-            print(f"❌ Failed to create replace package for {package_name}, message: {json_response.get('message')}")
+            raise ValueError(f"❌ Failed to create replace package for {package_name}, message: {json_response.get('message')}")
         
         return json_response.get("data", {})
