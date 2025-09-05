@@ -12,7 +12,8 @@ const PRINT_SIDES_GENERATED = [
     'sleeveLeft',
     'sleeveRight',
     'hood',
-    'sleeves',
+    'template_sleeves',
+    'template_hood',
 ]
 const SUPPLIERS_APPLY_CONTAIN_X_ONLY = ['DFWUS']
 const SIDES_APPLY_CONTAIN_X_ONLY = ['front', 'back']
@@ -174,7 +175,13 @@ const processVariant = ({ variant, supplierPrefix }) => {
 
         if (REAL_INPUT_SIDES.includes(side)) disrequire[side] = true
 
-        if (side === 'sleeves') {
+        const regex_template = /^template_(?<real_side>.+)$/
+        const match = regex_template.exec(side)
+        if (match) {
+            const real_side = match.groups.real_side
+            if (REAL_INPUT_SIDES.includes(real_side))
+                disrequire[real_side] = true
+
             width =
                 _.get(data, 'location.width') || _.get(data, 'steps.0.width')
             height =
@@ -182,8 +189,8 @@ const processVariant = ({ variant, supplierPrefix }) => {
 
             if (!width || !height) return
 
-            dimensions['sleeves'] = [
-                ..._.get(dimensions, 'sleeves', []),
+            dimensions[real_side] = [
+                ..._.get(dimensions, real_side, []),
                 {
                     width,
                     height,
@@ -279,7 +286,8 @@ const processNormal = ({
     const steps = []
     if (
         SUPPLIERS_APPLY_CONTAIN_X_ONLY.includes(supplierPrefix) &&
-        SIDES_APPLY_CONTAIN_X_ONLY.includes(side)
+        SIDES_APPLY_CONTAIN_X_ONLY.includes(side) &&
+        `${_.get(variant, 'product_type')}`.endsWith('_PET')
     ) {
         steps.push({
             name: 'resizeV2',
@@ -307,6 +315,7 @@ const processNormal = ({
             crop: crop || false,
             location,
             ...(addFields || {}),
+            ...(side === 'hood' && { ignoreTransparent: true }),
             ...(_.size(steps) ? { steps } : {}),
         },
     }
@@ -400,7 +409,8 @@ const getWidthHeight = ({ variant, side, defaultValue }) => {
 
 const validateAddLayout = ({ layout, side, data }) => {
     const width = _.get(data, 'location.width') || _.get(data, 'steps.0.width')
-    const height = _.get(data, 'location.height') || _.get(data, 'steps.0.height')
+    const height =
+        _.get(data, 'location.height') || _.get(data, 'steps.0.height')
     const layoutWidth = _.get(layout, 'width')
     const layoutHeight = _.get(layout, 'height')
 
