@@ -6,6 +6,7 @@
   "dependencies": {
     "@pf126/common": "^1.9.6",
     "@pf126/fulfillment-schemas": "^2.6.224",
+    "aws-sdk": "^2.1693.0",
     "bluebird": "^3.7.2",
     "csvtojson": "^2.0.10",
     "lodash": "^4.17.21",

@@ -60,3 +60,7 @@ migrations/
 .logs/
 
 node_modules/
+
+safezone.json
+
+.npmrc

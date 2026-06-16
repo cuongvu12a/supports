@@ -207,6 +207,7 @@ def handle_package(variant_by_partner_sku, package_info_by_name, package_name,  
             "reuse_label": False,
             "markFastProduction": False,
             "context": "RemapFromOrderDetailPage",
+            "shipping_carrier": "priority",
             "items": format_items,
         }
         package_id = package_info.get("_id", "")

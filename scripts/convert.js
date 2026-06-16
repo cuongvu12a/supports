@@ -22,9 +22,9 @@ const DPI = 300
 
 ;(async () => {
     try {
-        const supplierPrefix = 'DFWUS'
+        const supplierPrefix = 'PBAU'
         const jsonArray = await csvtojson().fromFile(
-            path.join(__dirname, `./dimensions/${supplierPrefix}.csv`)
+            path.join(__dirname, `./dimensions/${supplierPrefix}.csv`),
         )
 
         const variantGroupByProductType = {}
@@ -38,7 +38,7 @@ const DPI = 300
             })
             if (!_.some(REAL_INPUT_SIDES, (side) => !!json[side]))
                 throw new Error(
-                    `Error line ${index + 1}: At least one side is required`
+                    `Error line ${index + 1}: At least one side is required`,
                 )
 
             if (_.size(errors)) continue
@@ -56,7 +56,7 @@ const DPI = 300
         if (_.size(errors)) throw new Error(errors.join('\n'))
 
         for (const [productType, productVariants] of Object.entries(
-            variantGroupByProductType
+            variantGroupByProductType,
         )) {
             await processGenerateProductType({
                 productType,
@@ -91,7 +91,7 @@ const processGenerateProductType = async ({
         files.push({
             [[
                 supplierPrefix,
-                `${_.get(variant, 'product_type')}`,
+                `${_.get(variant, 'product_type')}`.toLocaleLowerCase(),
                 `${_.get(variant, 'size')}`,
                 `${_.get(variant, 'size')}.json`,
             ].join('/')]: {
@@ -106,8 +106,8 @@ const processGenerateProductType = async ({
                 (d) =>
                     !_.some(
                         exists,
-                        (e) => e.width === d.width && e.height === d.height
-                    )
+                        (e) => e.width === d.width && e.height === d.height,
+                    ),
             )
 
             dimensionSides[side] = [
@@ -122,10 +122,14 @@ const processGenerateProductType = async ({
     })
 
     files.push({
-        [[supplierPrefix, productType, 'default.json'].join('/')]: {
+        [[
+            supplierPrefix,
+            `${productType}`.toLocaleLowerCase(),
+            'default.json',
+        ].join('/')]: {
             dimensions: {
                 disrequire: Object.keys(disrequire).filter(
-                    (side) => disrequire[side]
+                    (side) => disrequire[side],
                 ),
                 ...dimensionSides,
             },
@@ -142,8 +146,8 @@ const processGenerateProductType = async ({
                         fileName,
                         content,
                     })
-                }
-            )
+                },
+            ),
     )
 
     return true
@@ -337,16 +341,17 @@ const getWidthHeight = ({ variant, side, defaultValue }) => {
         /^\s*(?<width>[\d\.]*)\s*(?:(px)|(cm)|(inch)|(in)|(mm)?)\s*x\s*(?<height>[\d\.]*)\s*(?<unit>(px)|(cm)|(inch)|(in)|(mm)?)\s*$/
 
     const dimensionSide = _.get(variant, side, '')
+    console.log('🚀 ~ getWidthHeight ~ dimensionSide:', dimensionSide)
     if (!dimensionSide) return { ignore: true }
 
     const match = dimensionSide.match(regex)
     const unit = formatUnit(
-        _.get(match.groups, 'unit') || _.get(variant, 'unit')
+        _.get(match.groups, 'unit') || _.get(variant, 'unit'),
     )
     if (!match || !unit)
         return {
             error: `Dimension ${JSON.stringify(
-                variant
+                variant,
             )} is invalid side ${side}`,
         }
 
@@ -354,7 +359,7 @@ const getWidthHeight = ({ variant, side, defaultValue }) => {
 
     const widthInPixel = convertUnitToPixel({
         value: parseFloat(
-            _.get(defaultValue, 'is_cut_sleeve') ? width / 2 : width
+            _.get(defaultValue, 'is_cut_sleeve') ? width / 2 : width,
         ),
         unit,
         dpi: _.get(variant, 'dpi'),
@@ -375,7 +380,7 @@ const getWidthHeight = ({ variant, side, defaultValue }) => {
         inches: {
             width: convertUnitToUnit({
                 value: parseFloat(
-                    _.get(defaultValue, 'is_cut_sleeve') ? width / 2 : width
+                    _.get(defaultValue, 'is_cut_sleeve') ? width / 2 : width,
                 ),
                 unitIn: unit,
                 unitOut: 'inch',
@@ -391,7 +396,7 @@ const getWidthHeight = ({ variant, side, defaultValue }) => {
         cm: {
             width: convertUnitToUnit({
                 value: parseFloat(
-                    _.get(defaultValue, 'is_cut_sleeve') ? width / 2 : width
+                    _.get(defaultValue, 'is_cut_sleeve') ? width / 2 : width,
                 ),
                 unitIn: unit,
                 unitOut: 'cm',
